@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install requirements
+        run: python -m pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check .
+      # No vendor files and no Bluetooth here: hardware and vendor-file tests skip themselves.
+      - name: Tests
+        run: python -m unittest discover -s tests -v

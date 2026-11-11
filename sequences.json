@@ -1,0 +1,212 @@
+{
+ "hello": {
+  "label": "Say hello",
+  "steps": [
+   {
+    "kind": "eyes",
+    "a": 8
+   },
+   {
+    "kind": "sound",
+    "path": "system/common/audio/card_dazhaohu.mp3"
+   },
+   {
+    "kind": "forward",
+    "mm": 60
+   },
+   {
+    "kind": "left",
+    "deg": 25
+   },
+   {
+    "kind": "right",
+    "deg": 50
+   },
+   {
+    "kind": "left",
+    "deg": 25
+   },
+   {
+    "kind": "backward",
+    "mm": 60
+   },
+   {
+    "kind": "eyes",
+    "a": 2
+   }
+  ]
+ },
+ "happy_dance": {
+  "label": "Happy dance",
+  "steps": [
+   {
+    "kind": "eyes",
+    "a": 4
+   },
+   {
+    "kind": "sound",
+    "path": "system/common/audio/yeah.mp3"
+   },
+   {
+    "kind": "left",
+    "deg": 40
+   },
+   {
+    "kind": "right",
+    "deg": 80
+   },
+   {
+    "kind": "left",
+    "deg": 80
+   },
+   {
+    "kind": "right",
+    "deg": 40
+   },
+   {
+    "kind": "sound",
+    "path": "system/common/audio/victory.mp3"
+   },
+   {
+    "kind": "left",
+    "deg": 360
+   },
+   {
+    "kind": "eyes",
+    "a": 2
+   }
+  ]
+ },
+ "dizzy": {
+  "label": "Dizzy spin",
+  "steps": [
+   {
+    "kind": "eyes",
+    "a": 6
+   },
+   {
+    "kind": "sound",
+    "path": "system/common/audio/card_touyun.mp3"
+   },
+   {
+    "kind": "right",
+    "deg": 720,
+    "speed": 200
+   },
+   {
+    "kind": "wait",
+    "ms": 400
+   },
+   {
+    "kind": "left",
+    "deg": 15
+   },
+   {
+    "kind": "right",
+    "deg": 30
+   },
+   {
+    "kind": "left",
+    "deg": 15
+   },
+   {
+    "kind": "eyes",
+    "a": 2
+   }
+  ]
+ },
+ "square": {
+  "label": "Drive a square",
+  "steps": [
+   {
+    "kind": "forward",
+    "mm": 150
+   },
+   {
+    "kind": "left",
+    "deg": 90,
+    "speed": 90
+   },
+   {
+    "kind": "forward",
+    "mm": 150
+   },
+   {
+    "kind": "left",
+    "deg": 90,
+    "speed": 90
+   },
+   {
+    "kind": "forward",
+    "mm": 150
+   },
+   {
+    "kind": "left",
+    "deg": 90,
+    "speed": 90
+   },
+   {
+    "kind": "forward",
+    "mm": 150
+   },
+   {
+    "kind": "left",
+    "deg": 90,
+    "speed": 90
+   }
+  ]
+ },
+ "sneak": {
+  "label": "Sneak and surprise",
+  "steps": [
+   {
+    "kind": "forward",
+    "mm": 180,
+    "speed": 40
+   },
+   {
+    "kind": "wait",
+    "ms": 500
+   },
+   {
+    "kind": "eyes",
+    "a": 9
+   },
+   {
+    "kind": "sound",
+    "path": "system/common/audio/card_xiayitiao.mp3"
+   },
+   {
+    "kind": "backward",
+    "mm": 80,
+    "speed": 200
+   },
+   {
+    "kind": "wait",
+    "ms": 800
+   },
+   {
+    "kind": "eyes",
+    "a": 2
+   }
+  ]
+ },
+ "twinkle": {
+  "label": "Twinkle twinkle",
+  "steps": [
+   {
+    "kind": "eyes",
+    "a": 4
+   },
+   {
+    "kind": "tune",
+    "notes": "C4 C4 G4 G4 A4 A4 G4 - F4 F4 E4 E4 D4 D4 C4 -",
+    "beat": 450
+   },
+   {
+    "kind": "eyes",
+    "a": 2
+   }
+  ]
+ }
+}

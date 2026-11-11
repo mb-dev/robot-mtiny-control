@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mTiny control</title>
+<style>
+:root{
+  --bg:#f4f1ea;--card:#fffdf8;--ink:#23262d;--soft:#667080;--line:#e2dccf;
+  --accent:#2f6fed;--accent-ink:#fff;--chip:#eef2fb;--chip-ink:#1d3f8f;
+  --stop:#e5484d;--ok:#2b9a66;--warn:#c47f17;--well:#f0ece2;
+  font:16px/1.45 ui-rounded,"SF Pro Rounded",system-ui,sans-serif;color:var(--ink);background:var(--bg)
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#12161d;--card:#1b212b;--ink:#eceff4;--soft:#9aa6b8;--line:#2c3543;
+  --accent:#6ea0ff;--accent-ink:#0c1830;--chip:#243049;--chip-ink:#cfe0ff;--well:#151a22
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg)}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-size:22px;margin:0;letter-spacing:-.01em}
+#state{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;color:var(--soft)}
+#state::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--warn)}
+#state.on::before{background:var(--ok)}
+.grow{flex:1}
+main{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start}
+@media(max-width:820px){main{grid-template-columns:minmax(0,1fr)}}
+.col{display:grid;gap:16px;min-width:0}
+section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;min-width:0}
+h2{font-size:18px;margin:0 0 4px}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin:14px 0 8px}
+p,small{color:var(--soft);margin:0 0 8px}
+small{display:block;font-size:13px}
+button,input,select{font:inherit;color:inherit}
+button{border:0;border-radius:12px;padding:10px 14px;background:var(--chip);color:var(--chip-ink);font-weight:600;cursor:pointer;transition:transform .06s}
+button:active{transform:scale(.96)}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-ink)}
+button.stop{background:var(--stop);color:#fff}
+button.running{outline:3px solid var(--ok)}
+header .stop{font-size:17px;padding:10px 22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips.big button{padding:14px 18px;font-size:17px;background:var(--accent);color:var(--accent-ink)}
+input,select{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:9px 10px;max-width:100%}
+input[type=number]{width:92px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row>input[type=search],.row>input[type=text]{flex:1;min-width:140px}
+.eyes{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;max-height:330px;overflow:auto;padding:4px}
+.eyes button{padding:6px 4px 4px;background:var(--well);color:var(--soft);font-size:11px;font-weight:500;display:grid;gap:2px;justify-items:center}
+.eyes img{width:48px;height:48px;border-radius:8px;background:#000;image-rendering:pixelated}
+.eyes button.picked{outline:3px solid var(--accent)}
+.sounds{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--well);margin-top:8px}
+.sounds button{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left;background:none;color:var(--ink);border-radius:0;border-bottom:1px solid var(--line);padding:9px 12px;font-weight:500}
+.sounds button span{color:var(--soft);font-variant-numeric:tabular-nums}
+.sounds button:hover{background:var(--chip)}
+.sounds button.unknown{color:var(--soft);font-style:italic}
+.sounds button span{font-size:13px;white-space:nowrap;font-style:normal}
+.pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:360px;margin:10px 0}
+.pad button{padding:16px 6px;font-size:16px}
+label{display:inline-flex;align-items:center;gap:8px;color:var(--soft);font-size:14px}
+details summary{cursor:pointer;font-weight:600;font-size:18px}
+details[open] summary{margin-bottom:10px}
+pre{white-space:pre-wrap;overflow:auto;max-height:260px;font:12px ui-monospace,monospace;background:var(--well);border-radius:10px;padding:10px;margin:8px 0 0}
+#toast{font-size:14px;color:var(--soft);order:3;flex:1 1 100%}
+#toast:empty{display:none}
+header .stop{margin-left:auto}
+#toast.bad{color:var(--stop)}
+</style>
+
+<header><div class="bar">
+  <h1>mTiny</h1>
+  <span id="state">Connecting…</span>
+  <span id="toast" aria-live="polite"></span>
+  <button class="stop" data-command="stop">Stop</button>
+</div></header>
+
+<main>
+<div class="col">
+  <section>
+    <h2>Shows</h2>
+    <p>Moves, eyes and sound together. Give the robot about half a metre of clear floor.</p>
+    <h3>Ours</h3><div id="seq-custom" class="chips big"></div>
+    <h3>Built into the robot</h3><div id="seq-built-in" class="chips"></div>
+    <small style="margin-top:10px">Built-in moves are replayed step by step over Bluetooth, so quick wiggles are a little slower than the original. Add your own shows in <code>sequences.json</code>.</small>
+  </section>
+
+  <section>
+    <h2>Drive</h2>
+    <p>Each press drives for the step time, then stops. Arrow keys work too; space stops.</p>
+    <div class="pad">
+      <button data-drive="-1,1">⟲ Spin</button><button class="primary" data-drive="1,1">▲ Forward</button><button data-drive="1,-1">Spin ⟳</button>
+      <button class="primary" data-drive="0,1">◀ Left</button><button class="stop" data-command="stop">Stop</button><button class="primary" data-drive="1,0">Right ▶</button>
+      <span></span><button class="primary" data-drive="-1,-1">▼ Back</button><span></span>
+    </div>
+    <div class="row">
+      <label>Power <input id="power" type="number" min="100" max="200" step="10" value="200"></label>
+      <label>Step (ms) <input id="step" type="number" min="100" max="3000" step="50" value="600"></label>
+    </div>
+  </section>
+</div>
+
+<div class="col">
+  <section>
+    <h2>Eyes</h2>
+    <p>Tap a face to show it. <button data-eyes="2,2" style="padding:4px 10px;font-size:14px">Back to normal</button></p>
+    <div id="eyeGrid" class="eyes"></div>
+    <div class="row" style="margin-top:8px"><input id="eyeId" type="number" style="flex:1;width:auto;min-width:140px" min="0" max="127" step="1" placeholder="Or type an animation ID (0-127)" aria-label="Eye animation ID"><button id="eyeShow">Show</button></div>
+  </section>
+
+  <section>
+    <h2>Sounds</h2>
+    <div class="row"><select id="folder" aria-label="Sound folder"></select><input id="filter" type="search" placeholder="Search all sounds" aria-label="Search sounds"></div>
+    <div id="soundList" class="sounds"></div>
+    <small style="margin-top:8px">Tap a sound to play it. New clips must first be copied to mTiny by USB.</small>
+    <div class="row" style="margin-top:8px"><input id="path" type="text" placeholder="Or type a path, e.g. system/common/audio/wow.mp3" aria-label="Sound path"><button id="sound">Play</button></div>
+  </section>
+
+  <section>
+    <details>
+      <summary>Advanced</summary>
+      <div class="row"><button data-command="status">Connection status</button><button data-command="motor_status">Read wheels</button><button data-command="step_status">Read wheel counters</button><button data-command="diagnostics">Diagnostics</button></div>
+      <h3>Single wheel pulse</h3>
+      <small>Left and right wheel power, positive is forward. Capped at ±200 and 250 ms.</small>
+      <div class="row">
+        <label>Left <input id="ch0" type="number" min="-200" max="200" step="10" value="200"></label>
+        <label>Right <input id="ch1" type="number" min="-200" max="200" step="10" value="0"></label>
+        <label>ms <input id="duration" type="number" min="10" max="250" step="10" value="250"></label>
+        <button id="pulse">Send pulse</button>
+      </div>
+      <h3>Replies</h3>
+      <pre id="log" aria-live="off"></pre>
+    </details>
+  </section>
+</div>
+</main>
+
+<script>
+let socket, serial = 0, ready = false, sounds = [];
+const pending = new Map();
+const $ = id => document.getElementById(id);
+const robotButtons = () => [...document.querySelectorAll('button')].filter(b => !b.closest('summary'));
+
+function log(x) { $('log').textContent = (JSON.stringify(x, null, 2) + '\n' + $('log').textContent).slice(0, 18000); }
+function toast(text, bad) { $('toast').textContent = text; $('toast').className = bad ? 'bad' : ''; }
+function enable() { robotButtons().forEach(b => b.disabled = !ready && b.dataset.command !== 'status'); }
+function display(s) {
+  ready = !!s.ready;
+  $('state').className = ready ? 'on' : '';
+  $('state').textContent = ready ? `Connected · firmware ${(s.version || '').split('.').slice(0, 4).join('.')}${s.busy ? ' · busy' : ''}`
+                                 : `Looking for the robot${s.last_error ? ' · ' + s.last_error : ''}`;
+  enable();
+}
+function send(command, args = {}, button) {
+  if (socket?.readyState !== WebSocket.OPEN) return;
+  const id = ++serial;
+  if (button) { pending.set(id, button); button.classList.add('running'); }
+  socket.send(JSON.stringify({id, command, ...args}));
+}
+function make(tag, text, cls) { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
+
+function showSequences(list) {
+  for (const g of ['custom', 'built-in']) $('seq-' + g).textContent = '';
+  for (const q of list) {
+    const b = make('button', q.label);
+    b.onclick = () => { toast(`Running "${q.label}"…`); send('sequence', {name: q.name}, b); };
+    $('seq-' + q.group).append(b);
+  }
+  enable();
+}
+function showFolder() {
+  const folder = $('folder').value, word = $('filter').value.trim().toLowerCase(), box = $('soundList');
+  box.textContent = '';
+  for (const q of sounds) {
+    const cut = q.path.lastIndexOf('/'), name = q.path.slice(cut + 1);
+    if (word ? !(q.label + ' ' + q.path).toLowerCase().includes(word) : q.path.slice(0, cut) !== folder) continue;
+    const b = make('button', q.label, q.known ? '' : 'unknown');
+    b.title = q.path;
+    b.append(make('span', `${q.known ? '' : 'not named yet · '}${name.replace('.mp3', '')} · ${q.seconds} s`));
+    b.onclick = () => send('sound', {path: q.path});
+    box.append(b);
+  }
+  if (!box.children.length) box.append(make('small', sounds.length ? 'No sounds match.' : 'No sound list available.'));
+  enable();
+}
+function showLibrary(lib) {
+  $('eyeGrid').textContent = '';
+  if (!lib.generated) {
+    $('eyeGrid').append(make('small', 'Eye and sound library not generated yet. Run build_library.py (see the README); until then, type an eye ID or a sound path below.'));
+  }
+  for (const e of lib.eyes) {
+    const b = make('button'), img = make('img');
+    img.src = `/eyes/${e.id}.gif`; img.alt = ''; img.loading = 'lazy'; img.onerror = () => img.remove();
+    b.title = `${e.id} - ${e.name}`; b.append(img, make('span', e.name.length > 9 ? String(e.id) : e.name));
+    b.onclick = () => {
+      document.querySelectorAll('.eyes .picked').forEach(x => x.classList.remove('picked'));
+      b.classList.add('picked'); send('eyes', {a: e.id, b: e.id});
+    };
+    $('eyeGrid').append(b);
+  }
+  sounds = lib.sounds;
+  $('folder').textContent = '';
+  for (const f of new Set(sounds.map(q => q.path.slice(0, q.path.lastIndexOf('/'))))) {
+    const o = make('option', f.replace('system/', '')); o.value = f; $('folder').append(o);
+  }
+  showFolder();
+}
+function connect() {
+  socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`);
+  socket.onopen = () => { send('sequences'); send('library'); };
+  socket.onmessage = e => {
+    const m = JSON.parse(e.data), r = m.result || {};
+    if (m.type === 'response') {
+      const b = pending.get(m.id); if (b) { b.classList.remove('running'); pending.delete(m.id); }
+      if (!m.ok) toast(m.error, true); else if (b) toast('Done');
+      if (m.ok && r.sounds) return showLibrary(r);
+      if (m.ok && r.sequences) return showSequences(r.sequences);
+      if (m.ok && 'ready' in r) return display(r);
+    } else if (m.type === 'status' || m.event === 'ready') display(m);
+    else if (m.event === 'connection_unavailable' || m.event === 'disconnected') display({ready: false, last_error: m.reason});
+    log(m);
+  };
+  socket.onclose = () => {
+    ready = false; enable(); $('state').className = ''; $('state').textContent = 'Control server not running';
+    setTimeout(connect, 1500);
+  };
+  socket.onerror = () => socket.close();
+}
+function drive(l, r) { const p = Number($('power').value); send('drive', {left: l * p, right: r * p, ms: Number($('step').value)}); }
+
+document.querySelectorAll('button[data-command]').forEach(b => b.onclick = () => send(b.dataset.command));
+document.querySelectorAll('button[data-eyes]').forEach(b => b.onclick = () => { const [a, c] = b.dataset.eyes.split(',').map(Number); send('eyes', {a, b: c}); });
+document.querySelectorAll('button[data-drive]').forEach(b => b.onclick = () => drive(...b.dataset.drive.split(',').map(Number)));
+const keys = {ArrowUp: [1, 1], ArrowDown: [-1, -1], ArrowLeft: [0, 1], ArrowRight: [1, 0]};
+document.addEventListener('keydown', e => {
+  if (['INPUT', 'SELECT'].includes(e.target.tagName) || e.repeat) return;
+  if (e.key === ' ') { e.preventDefault(); send('stop'); }
+  else if (keys[e.key]) { e.preventDefault(); drive(...keys[e.key]); }
+});
+$('folder').onchange = showFolder;
+$('filter').oninput = showFolder;
+$('sound').onclick = () => { const p = $('path').value.trim(); if (p) send('sound', {path: p}); };
+$('eyeShow').onclick = () => { const n = parseInt($('eyeId').value, 10); if (n >= 0 && n <= 127) send('eyes', {a: n, b: n}); };
+$('pulse').onclick = () => send('pulse', {channel0: Number($('ch0').value), channel1: Number($('ch1').value), duration_ms: Number($('duration').value)});
+enable(); connect(); setInterval(() => send('status'), 5000);
+</script>
+</html>
