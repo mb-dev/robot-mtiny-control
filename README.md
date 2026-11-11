@@ -6,6 +6,14 @@ WebSocket API, a small control web page, scripted "shows", eye animations, sound
 
 It is the optional robot for the spelling game at
 [mb-dev/robo-words-spelling-game](https://github.com/mb-dev/robo-words-spelling-game).
+[Watch a 35-second demo on YouTube](https://youtube.com/shorts/RzYreInii0E).
+
+This is a hobby project to learn robotics and make a fun game for kids. The code, this README and the rest of the
+repository were written by an AI coding agent (Claude) working with a parent.
+
+**You need your own robot.** To use any of this you have to buy an mTiny from
+[Makeblock](https://www.makeblock.com). This repository contains no robot, no firmware and no sounds of theirs.
+Planned for the future: an open-source robot built on a micro:bit, as I work my way up the chain.
 
 > **Read this first**
 >
