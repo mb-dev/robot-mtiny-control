@@ -210,12 +210,7 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([c for c in self.robots[0].calls if c[0] == 'drive'], [('drive', 200, 200, 600)])
 
     async def test_http_panel_and_origin_restrictions(self):
-        self.server.close()
-        await self.server.wait_closed()
-        # Reserve the port, then apply the production handshake handler.
-        self.server = await serve(self.control.handle, '127.0.0.1', 0)
-        port = self.server.sockets[0].getsockname()[1]
-        self.server.process_request = http_handler(self.control, port)
+        port = await self.api_port()
         url = f'ws://127.0.0.1:{port}/ws'
         async with connect(url, origin=f'http://127.0.0.1:{port}') as ws:
             self.assertEqual(json.loads(await ws.recv())['type'], 'status')
@@ -257,9 +252,14 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
     async def api_port(self, **kwargs):
         self.server.close()
         await self.server.wait_closed()
-        self.server = await serve(self.control.handle, '127.0.0.1', 0)
+        # The production handler needs the port, which is only known after binding, and
+        # websockets binds process_request when serve() is called: so pass a late-bound hook.
+        handler = {}
+        self.server = await serve(self.control.handle, '127.0.0.1', 0,
+                                  process_request=lambda connection, request:
+                                  handler['process_request'](connection, request))
         port = self.server.sockets[0].getsockname()[1]
-        self.server.process_request = http_handler(self.control, port, **kwargs)
+        handler['process_request'] = http_handler(self.control, port, **kwargs)
         return port
 
     async def test_http_api(self):
